@@ -62,33 +62,39 @@ def parse_log(input_dir, output_dir, log_file, parser_type):
 
 
 
-def sample_raw_data(data_files, output_file, sample_window_size, sample_step_size):
+def sample_raw_data(data_file, output_file, sample_window_size, sample_step_size):
     # sample 1M by sliding window, abnormal rate is over 2%
     sample_data = []
     labels = []
     idx = 0
 
     # spirit dataset can start from the 2Mth line, as there are many abnormal lines gathering in the first 2M
-    for data_file in data_file:
-        with open(data_file, 'r', errors='ignore') as f:
-            for line in f:
-                labels.append(any(element in line for element in abnormal_labels))
-                sample_data.append(line)
+    
+    with open(data_file, 'r', errors='ignore') as f:
+        for line in f:
+            labels.append(any(element in line for element in abnormal_labels))
+            sample_data.append(line)
 
-                if len(labels) == sample_window_size:
-                    abnormal_rate = sum(np.array(labels)) / len(labels)
-                    print(f"{idx + 1} lines, abnormal rate {abnormal_rate}")
-                    break
+            if len(labels) == sample_window_size:
+                abnormal_rate = sum(np.array(labels)) / len(labels)
+                print(f"{idx + 1} lines, abnormal rate {abnormal_rate}")
+                break
 
-                idx += 1
-                if idx % sample_step_size == 0:
-                    print(f"Process {round(idx/sample_window_size * 100,4)} % raw data", end='\r')
+            idx += 1
+            if idx % sample_step_size == 0:
+                print(f"Process {round(idx/sample_window_size * 100,4)} % raw data", end='\r')
 
     with open(output_file, "w") as f:
         f.writelines(sample_data)
 
     print("Sampling done")
 
+def merge_files(filenames, data_dir):
+    with open(os.path.join(data_dir ,'OpenStack.log'), 'w') as outfile:
+        for names in filenames:
+            with open(names) as infile:
+                outfile.write(infile.read())
+            outfile.write("\n")
 
 if __name__ == "__main__":
     data_dir = os.path.expanduser("~/.dataset/OpenStack/")
@@ -99,7 +105,7 @@ if __name__ == "__main__":
     sample_step_size = 10**4
     window_name = ''
     log_file = sample_log_file
-
+    merge_files([os.path.join(data_dir, "openstack_abnormal.log"), os.path.join(data_dir, "openstack_normal1.log") ], data_dir)
     parser_type = 'drain'
     #mins
     window_size = 1
