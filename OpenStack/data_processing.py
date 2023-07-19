@@ -27,18 +27,15 @@ def deeplog_file_generator(filename, df, features):
 
 
 def parse_log(input_dir, output_dir, log_file, parser_type):
-    log_format = '<Log_filename> <Date> <PID> <Log_level> <Source> <Content> '
+    log_format = '<Logrecord> <Date> <Time> <Pid> <Level> <Component> \[<ADDR>\] <Content>'
     regex = [
-        r'(req-)[0-9a-fA-F]+(-)[0-9a-fA-F]+(-)[0-9a-fA-F]+(-)[0-9a-fA-F]+(-)[0-9a-fA-F]+',  # Req
-        r'\d+\.\d+\.\d+\.\d+', #IPs
-        r'(?<=Warning: we failed to resolve data source name )[\w\s]+',
-        r'\d+'
+        r'((\d+\.){3}\d+,?)+', r'/.+?\s', r'\d+'
     ]
     keep_para = False
     if parser_type == "drain":
         # the hyper parameter is set according to http://jmzhu.logpai.com/pub/pjhe_icws2017.pdf
-        st = 0.3  # Similarity threshold
-        depth = 3  # Depth of all leaf nodes
+        st = 0.5  # Similarity threshold
+        depth = 5  # Depth of all leaf nodes
 
         # Drain is modified
         parser = Drain.LogParser(log_format,
