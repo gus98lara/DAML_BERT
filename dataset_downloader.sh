@@ -31,7 +31,7 @@ elif [ "$downloaded_dataset" = "OpenStack" ]; then
     zipfile=OpenStack.tar.gz
     wget https://zenodo.org/record/3227177/files/${zipfile}?download=1
     mv ${zipfile}?download=1 ${zipfile}
-    gunzip -k $zipfile
+    tar -xvzf $zipfile
     
 elif [ "$downloaded_dataset" == "Hadoop" ]; then
     echo "TBI"
