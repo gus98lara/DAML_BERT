@@ -37,5 +37,6 @@ elif [ "$downloaded_dataset" == "Hadoop" ]; then
 else
     echo "ERROR: Dataset not supported"
     return 1
+fi
 
 return 0
