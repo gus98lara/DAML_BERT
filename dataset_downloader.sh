@@ -3,7 +3,7 @@
 downloaded_dataset=$1
 
 
-if [ "$downloaded_dataset" == "Thunderbird" ]; then
+if [ "$downloaded_dataset" = "Thunderbird" ]; then
     file="${HOME}/.dataset/tbird/"
     if [ -e $file ]
     then
@@ -18,7 +18,7 @@ if [ "$downloaded_dataset" == "Thunderbird" ]; then
     gunzip -k $zipfile
     cp tbird2 Thunderbird.log
     
-elif [ "$downloaded_dataset" == "OpenStack" ]; then
+elif [ "$downloaded_dataset" = "OpenStack" ]; then
     file="${HOME}/.dataset/OpenStack/"
     if [ -e $file ]
     then
