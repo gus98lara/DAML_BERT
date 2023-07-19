@@ -1,6 +1,6 @@
 #!/bin/bash
 
-downloaded_dataset={1}
+downloaded_dataset=$1
 
 
 if [ "$downloaded_dataset" == "Thunderbird" ]; then
