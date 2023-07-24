@@ -8,7 +8,7 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
 from bert_pytorch.dataset import WordVocab
 from bert_pytorch import Predictor, Trainer
-from logdeep.tools.utils import *
+from utils import *
 
 options = dict()
 options['device'] = 'cuda' if torch.cuda.is_available() else 'cpu'

@@ -127,50 +127,5 @@ if __name__ == "__main__":
     #########
     parse_log(data_dir, output_dir, log_file, parser_type)
 
-    ##################
-    # Transformation #
-    ##################
-    df = pd.read_csv(f'{output_dir}{log_file}_structured.csv')
 
-    # data preprocess
-    df["Label"] = df["Label"].apply(lambda x: int(x != "-"))
-
-    df['datetime'] = pd.to_datetime(df["Date"] + " " + df['Time'], format='%Y-%m-%d %H:%M:%S')
-    df['timestamp'] = df["datetime"].values.astype(np.int64) // 10 ** 9
-    df['deltaT'] = df['datetime'].diff() / np.timedelta64(1, 's')
-    df['deltaT'].fillna(0)
-
-    # sampling with sliding window
-    #deeplog_df = sliding_window(df[["timestamp", "Label", "EventId", "deltaT"]],
-    #                            para={"window_size": float(window_size)*60, "step_size": float(step_size) * 60}
-    #                            )
-    #output_dir += window_name
-    #
-    ##########
-    ## Train #
-    ##########
-    #df_normal = deeplog_df[deeplog_df["Label"] == 0]
-    #df_normal = df_normal.sample(frac=1, random_state=12).reset_index(drop=True) #shuffle
-    #normal_len = len(df_normal)
-    #train_len = int(train_ratio) if train_ratio >= 1 else int(normal_len * train_ratio)
-    #
-    #train = df_normal[:train_len]
-    #deeplog_file_generator(os.path.join(output_dir,'train'), train, ["EventId"])
-    #print("training size {}".format(train_len))
-    #
-    #
-    ################
-    ## Test Normal #
-    ################
-    #test_normal = df_normal[train_len:]
-    #deeplog_file_generator(os.path.join(output_dir, 'test_normal'), test_normal, ["EventId"])
-    #print("test normal size {}".format(normal_len - train_len))
-
-
-    ##################
-    ## Test Abnormal #
-    ##################
-    #df_abnormal = deeplog_df[deeplog_df["Label"] == 1]
-    #deeplog_file_generator(os.path.join(output_dir,'test_abnormal'), df_abnormal, ["EventId"])
-    #print('test abnormal size {}'.format(len(df_abnormal)))
 
