@@ -5,9 +5,9 @@ sys.path.append('./')
 import os
 import pandas as pd
 import numpy as np
-from logparser import Spell, Drain
+from logparser.logparser import Spell, Drain
 from tqdm import tqdm
-from logdeep.dataset.session import sliding_window
+#from logdeep.dataset.session import sliding_window
 
 tqdm.pandas()
 pd.options.mode.chained_assignment = None  # default='warn'
