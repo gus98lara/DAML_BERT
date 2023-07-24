@@ -132,8 +132,10 @@ if __name__ == "__main__":
     ##################
     df = pd.read_csv(f'{output_dir}{log_file}_structured.csv')
 
+    #log_format = '<Logrecord> <Date> <Time> <Pid> <Level> <Component> \[<ADDR>\] <Content>'
+    #abnormal_labels
     # data preprocess
-    df["Label"] = df["Label"].apply(lambda x: int(x != "-"))
+    df["Content"] = df["Content"].apply(lambda x: int(x in abnormal_labels))
 
     df['datetime'] = pd.to_datetime(df["Date"] + " " + df['Time'], format='%Y-%m-%d %H:%M:%S')
     df['timestamp'] = df["datetime"].values.astype(np.int64) // 10 ** 9
@@ -141,7 +143,7 @@ if __name__ == "__main__":
     df['deltaT'].fillna(0)
 
     # sampling with sliding window
-    deeplog_df = sliding_window(df[["timestamp", "Label", "EventId", "deltaT"]],
+    deeplog_df = sliding_window(df[["timestamp", "Content", "EventId", "deltaT"]],
                                 para={"window_size": float(window_size)*60, "step_size": float(step_size) * 60}
                                 )
     output_dir += window_name
@@ -149,7 +151,7 @@ if __name__ == "__main__":
     #########
     # Train #
     #########
-    df_normal = deeplog_df[deeplog_df["Label"] == 0]
+    df_normal = deeplog_df[deeplog_df["Content"] == 0]
     df_normal = df_normal.sample(frac=1, random_state=12).reset_index(drop=True) #shuffle
     normal_len = len(df_normal)
     train_len = int(train_ratio) if train_ratio >= 1 else int(normal_len * train_ratio)
@@ -170,7 +172,7 @@ if __name__ == "__main__":
     #################
     # Test Abnormal #
     #################
-    df_abnormal = deeplog_df[deeplog_df["Label"] == 1]
+    df_abnormal = deeplog_df[deeplog_df["Content"] == 1]
     deeplog_file_generator(os.path.join(output_dir,'test_abnormal'), df_abnormal, ["EventId"])
     print('test abnormal size {}'.format(len(df_abnormal)))
 
