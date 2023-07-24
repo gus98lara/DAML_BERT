@@ -1,5 +1,6 @@
 import sys
 sys.path.append("../")
+sys.path.append("./")
 sys.path.append("../../")
 
 import os
@@ -12,7 +13,7 @@ from utils import *
 
 options = dict()
 options['device'] = 'cuda' if torch.cuda.is_available() else 'cpu'
-options["output_dir"] = "../output/tbird/"
+options["output_dir"] = "../output/OpenStack/"
 options["model_dir"] = options["output_dir"] + "bert/"
 options["train_vocab"] = options["output_dir"] + "train"
 options["vocab_path"] = options["output_dir"] + "vocab.pkl"
