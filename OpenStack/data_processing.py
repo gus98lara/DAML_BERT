@@ -109,7 +109,7 @@ if __name__ == "__main__":
     #mins
     window_size = 1
     step_size = 0.5
-    train_ratio = 6000
+    train_ratio = 0.8
 
     ########
     # count anomaly
@@ -154,7 +154,7 @@ if __name__ == "__main__":
     df_normal = deeplog_df[deeplog_df["Content"] == 0]
     df_normal = df_normal.sample(frac=1, random_state=12).reset_index(drop=True) #shuffle
     normal_len = len(df_normal)
-    train_len = int(train_ratio) if train_ratio >= 1 else int(normal_len * train_ratio)
+    train_len = int(normal_len * train_ratio)
 
     train = df_normal[:train_len]
     deeplog_file_generator(os.path.join(output_dir,'train'), train, ["EventId"])
