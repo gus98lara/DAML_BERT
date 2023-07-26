@@ -13,7 +13,7 @@ from utils import *
 
 options = dict()
 options['device'] = 'cuda' if torch.cuda.is_available() else 'cpu'
-options["output_dir"] = "../output/OpenStack/"
+options["output_dir"] = "/content/output/OpenStack/"
 options["model_dir"] = options["output_dir"] + "bert/"
 options["train_vocab"] = options["output_dir"] + "train"
 options["vocab_path"] = options["output_dir"] + "vocab.pkl"
@@ -99,6 +99,7 @@ if __name__ == "__main__":
 
     if args.mode == 'train':
         Trainer(options).train()
+        Trainer(options).plot_train_valid_loss("/content/output/OpenStack/train_log2.csv")
 
     elif args.mode == 'predict':
         Predictor(options).predict()
