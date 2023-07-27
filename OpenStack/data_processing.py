@@ -99,16 +99,16 @@ if __name__ == "__main__":
     data_dir = os.path.expanduser("~/.dataset/OpenStack/")
     output_dir = "../output/OpenStack/"
     raw_log_file = "OpenStack.log"
-    sample_log_file = "OpenStack_20M.log"
-    sample_window_size = 2*10**7
-    sample_step_size = 10**4
+    sample_log_file = "OpenStack.log"
+    sample_window_size = 70724
+    sample_step_size = 10
     window_name = ''
     log_file = sample_log_file
     merge_files([os.path.join(data_dir, "openstack_abnormal.log"), os.path.join(data_dir, "openstack_normal1.log") ], data_dir)
     parser_type = 'drain'
     #mins
-    window_size = 1
-    step_size = 0.5
+    window_size = 100
+    step_size = 0.01
     train_ratio = 0.8
 
     ########
@@ -120,7 +120,7 @@ if __name__ == "__main__":
     #########
     # sample raw data
     #########
-    sample_raw_data(data_dir+raw_log_file, data_dir+sample_log_file, sample_window_size, sample_step_size )
+    #sample_raw_data(os.path.join(data_dir,raw_log_file), os.path.join(data_dir,sample_log_file), sample_window_size, sample_step_size )
 
 
     ##########
@@ -135,7 +135,7 @@ if __name__ == "__main__":
     #log_format = '<Logrecord> <Date> <Time> <Pid> <Level> <Component> \[<ADDR>\] <Content>'
     #abnormal_labels
     # data preprocess
-    df["Content"] = df["Content"].apply(lambda x: int(x in abnormal_labels))
+    df["Content"] = df["Content"].apply(lambda x: int(any(substring in x for substring in abnormal_labels)))
 
     df['datetime'] = pd.to_datetime(df["Date"] + " " + df['Time'], format='%Y-%m-%d %H:%M:%S')
     df['timestamp'] = df["datetime"].values.astype(np.int64) // 10 ** 9

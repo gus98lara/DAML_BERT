@@ -99,7 +99,6 @@ if __name__ == "__main__":
 
     if args.mode == 'train':
         Trainer(options).train()
-        Trainer(options).plot_train_valid_loss("/content/output/OpenStack/train_log2.csv")
 
     elif args.mode == 'predict':
         Predictor(options).predict()
