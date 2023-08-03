@@ -19,7 +19,7 @@ if [ "$downloaded_dataset" = "Thunderbird" ]; then
     cp tbird2 Thunderbird.log
     
 elif [ "$downloaded_dataset" = "OpenStack" ]; then
-    file="${HOME}/.dataset/OpenStack/"
+    file=".data/OpenStack/"
     if [ -e $file ]
     then
       echo "INFO: $file exists"

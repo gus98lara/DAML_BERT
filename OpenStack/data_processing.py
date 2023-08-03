@@ -35,7 +35,7 @@ if __name__ == '__main__':
     # Parser #
     ##########
     input_dir = './data/OpenStack/'
-    output_dir = './openstack_result/'
+    output_dir = "/content/output/OpenStack/"
     log_format = '<Logrecord> <Date> <Time> <Pid> <Level> <Component> \[<ADDR>\] <Content>'
     log_main = 'open_stack'
     tau = 0.5
