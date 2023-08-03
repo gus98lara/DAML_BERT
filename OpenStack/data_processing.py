@@ -1,179 +1,86 @@
-import sys
-sys.path.append('../../')
-sys.path.append('../')
-sys.path.append('./')
-
 import os
+import sys
+import logging
 import pandas as pd
-import numpy as np
-from logparser.logparser import Spell, Drain
-from tqdm import tqdm
-from logdeep.dataset.session import sliding_window
+from spellpy import spell
 
-tqdm.pandas()
-pd.options.mode.chained_assignment = None  # default='warn'
+logging.basicConfig(level=logging.WARNING,
+                    format='[%(asctime)s][%(levelname)s]: %(message)s')
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler(sys.stdout))
 
-abnormal_labels = [
-    "544fd51c-4edc-4780-baae-ba1d80a0acfc",
-    "ae651dff-c7ad-43d6-ac96-bbcd820ccca8",
-    "a445709b-6ad0-40ec-8860-bec60b6ca0c2",
-    "1643649d-2f42-4303-bfcd-7798baec19f9"
-]
 
-def deeplog_file_generator(filename, df, features):
+def deeplog_df_transfer(df, event_id_map):
+    df['datetime'] = pd.to_datetime(df['Date'] + ' ' + df['Time'])
+    df = df[['datetime', 'EventId']]
+    df['EventId'] = df['EventId'].apply(lambda e: event_id_map[e] if event_id_map.get(e) else -1)
+    deeplog_df = df.set_index('datetime').resample('1min').apply(_custom_resampler).reset_index()
+    return deeplog_df
+
+
+def _custom_resampler(array_like):
+    return list(array_like)
+
+
+def deeplog_file_generator(filename, df):
     with open(filename, 'w') as f:
-        for _, row in df.iterrows():
-            for val in zip(*row[features]):
-                f.write(','.join([str(v) for v in val]) + ' ')
+        for event_id_list in df['EventId']:
+            for event_id in event_id_list:
+                f.write(str(event_id) + ' ')
             f.write('\n')
 
 
-def parse_log(input_dir, output_dir, log_file, parser_type):
-    log_format = '<Logrecord> <Date> <Time> <Pid> <Level> <Component> \[<ADDR>\] <Content>'
-    regex = [
-        r'((\d+\.){3}\d+,?)+', r'/.+?\s', r'\d+'
-    ]
-    keep_para = False
-    if parser_type == "drain":
-        # the hyper parameter is set according to http://jmzhu.logpai.com/pub/pjhe_icws2017.pdf
-        st = 0.5  # Similarity threshold
-        depth = 5  # Depth of all leaf nodes
-
-        # Drain is modified
-        parser = Drain.LogParser(log_format,
-                                 indir=input_dir,
-                                 outdir=output_dir,
-                                 depth=depth,
-                                 st=st,
-                                 rex=regex,
-                                 keep_para=keep_para, maxChild=1000)
-        parser.parse(log_file)
-
-    elif parser_type == "spell":
-        tau = 0.35
-        parser = Spell.LogParser(indir=data_dir,
-                                 outdir=output_dir,
-                                 log_format=log_format,
-                                 tau=tau,
-                                 rex=regex,
-                                 keep_para=keep_para)
-        parser.parse(log_file)
-
-
-
-def sample_raw_data(data_file, output_file, sample_window_size, sample_step_size):
-    # sample 1M by sliding window, abnormal rate is over 2%
-    sample_data = []
-    labels = []
-    idx = 0
-
-    # spirit dataset can start from the 2Mth line, as there are many abnormal lines gathering in the first 2M
-    
-    with open(data_file, 'r', errors='ignore') as f:
-        for line in f:
-            labels.append(any(element in line for element in abnormal_labels))
-            sample_data.append(line)
-
-            if len(labels) == sample_window_size:
-                abnormal_rate = sum(np.array(labels)) / len(labels)
-                print(f"{idx + 1} lines, abnormal rate {abnormal_rate}")
-                break
-
-            idx += 1
-            if idx % sample_step_size == 0:
-                print(f"Process {round(idx/sample_window_size * 100,4)} % raw data", end='\r')
-
-    with open(output_file, "w") as f:
-        f.writelines(sample_data)
-
-    print("Sampling done")
-
-def merge_files(filenames, data_dir):
-    with open(os.path.join(data_dir ,'OpenStack.log'), 'w') as outfile:
-        for names in filenames:
-            with open(names) as infile:
-                outfile.write(infile.read())
-            outfile.write("\n")
-
-if __name__ == "__main__":
-    data_dir = os.path.expanduser("~/.dataset/OpenStack/")
-    output_dir = "../output/OpenStack/"
-    raw_log_file = "OpenStack.log"
-    sample_log_file = "OpenStack.log"
-    sample_window_size = 70724
-    sample_step_size = 10
-    window_name = ''
-    log_file = sample_log_file
-    merge_files([os.path.join(data_dir, "openstack_abnormal.log"), os.path.join(data_dir, "openstack_normal1.log") ], data_dir)
-    parser_type = 'drain'
-    #mins
-    window_size = 100
-    step_size = 0.01
-    train_ratio = 0.8
-
-    ########
-    # count anomaly
-    ########
-    # count_anomaly(data_dir + log_file)
-    # sys.exit()
-
-    #########
-    # sample raw data
-    #########
-    #sample_raw_data(os.path.join(data_dir,raw_log_file), os.path.join(data_dir,sample_log_file), sample_window_size, sample_step_size )
-
-
+if __name__ == '__main__':
     ##########
     # Parser #
-    #########
-    parse_log(data_dir, output_dir, log_file, parser_type)
+    ##########
+    input_dir = './data/OpenStack/'
+    output_dir = './openstack_result/'
+    log_format = '<Logrecord> <Date> <Time> <Pid> <Level> <Component> \[<ADDR>\] <Content>'
+    log_main = 'open_stack'
+    tau = 0.5
+
+    parser = spell.LogParser(
+        indir=input_dir,
+        outdir=output_dir,
+        log_format=log_format,
+        logmain=log_main,
+        tau=tau,
+    )
+
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    for log_name in ['openstack_abnormal.log', 'openstack_normal2.log', 'openstack_normal1.log']:
+        parser.parse(log_name)
+
     ##################
     # Transformation #
     ##################
-    df = pd.read_csv(f'{output_dir}{log_file}_structured.csv')
+    df = pd.read_csv(f'{output_dir}/openstack_normal1.log_structured.csv')
+    df_normal = pd.read_csv(f'{output_dir}/openstack_normal2.log_structured.csv')
+    df_abnormal = pd.read_csv(f'{output_dir}/openstack_abnormal.log_structured.csv')
 
-    #log_format = '<Logrecord> <Date> <Time> <Pid> <Level> <Component> \[<ADDR>\] <Content>'
-    #abnormal_labels
-    # data preprocess
-    df["Content"] = df["Content"].apply(lambda x: int(any(substring in x for substring in abnormal_labels)))
+    event_id_map = dict()
+    for i, event_id in enumerate(df['EventId'].unique(), 1):
+        event_id_map[event_id] = i
 
-    df['datetime'] = pd.to_datetime(df["Date"] + " " + df['Time'], format='%Y-%m-%d %H:%M:%S')
-    df['timestamp'] = df["datetime"].values.astype(np.int64) // 10 ** 9
-    df['deltaT'] = df['datetime'].diff() / np.timedelta64(1, 's')
-    df['deltaT'].fillna(0)
-
-    # sampling with sliding window
-    deeplog_df = sliding_window(df[["timestamp", "Content", "EventId", "deltaT"]],
-                                para={"window_size": float(window_size)*60, "step_size": float(step_size) * 60}
-                                )
-    output_dir += window_name
+    logger.info(f'length of event_id_map: {len(event_id_map)}')
 
     #########
     # Train #
     #########
-    df_normal = deeplog_df[deeplog_df["Content"] == 0]
-    df_normal = df_normal.sample(frac=1, random_state=12).reset_index(drop=True) #shuffle
-    normal_len = len(df_normal)
-    train_len = int(normal_len * train_ratio)
-
-    train = df_normal[:train_len]
-    deeplog_file_generator(os.path.join(output_dir,'train'), train, ["EventId"])
-    print("training size {}".format(train_len))
-
+    deeplog_train = deeplog_df_transfer(df, event_id_map)
+    deeplog_file_generator('train', deeplog_train)
 
     ###############
     # Test Normal #
     ###############
-    test_normal = df_normal[train_len:]
-    deeplog_file_generator(os.path.join(output_dir, 'test_normal'), test_normal, ["EventId"])
-    print("test normal size {}".format(normal_len - train_len))
-
+    deeplog_test_normal = deeplog_df_transfer(df_normal, event_id_map)
+    deeplog_file_generator('test_normal', deeplog_test_normal)
 
     #################
     # Test Abnormal #
     #################
-    df_abnormal = deeplog_df[deeplog_df["Content"] == 1]
-    deeplog_file_generator(os.path.join(output_dir,'test_abnormal'), df_abnormal, ["EventId"])
-    print('test abnormal size {}'.format(len(df_abnormal)))
-
-
+    deeplog_test_abnormal = deeplog_df_transfer(df_abnormal, event_id_map)
+    deeplog_file_generator('test_abnormal', deeplog_test_abnormal)
