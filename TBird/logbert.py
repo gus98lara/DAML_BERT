@@ -1,19 +1,22 @@
 import sys
 sys.path.append("../")
-sys.path.append("./")
 sys.path.append("../../")
 
 import os
+dirname = os.path.dirname(__file__)
+filename = os.path.join(dirname, '../deeplog')
+
+
 import argparse
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
 from bert_pytorch.dataset import WordVocab
 from bert_pytorch import Predictor, Trainer
-from utils import *
+from logdeep.tools.utils import *
 
 options = dict()
 options['device'] = 'cuda' if torch.cuda.is_available() else 'cpu'
-options["output_dir"] = "/content/output/OpenStack/"
+options["output_dir"] = "../output/tbird/"
 options["model_dir"] = options["output_dir"] + "bert/"
 options["train_vocab"] = options["output_dir"] + "train"
 options["vocab_path"] = options["output_dir"] + "vocab.pkl"
@@ -32,7 +35,7 @@ options["vocab_size"] = 844
 
 options["train_ratio"] = 1
 options["valid_ratio"] = 0.1
-options["test_ratio"] = 0.2
+options["test_ratio"] = 0.1
 
 
 # features
