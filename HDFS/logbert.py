@@ -30,7 +30,7 @@ options["min_len"] = 10
 options["mask_ratio"] = 0.65
 # sample ratio
 options["train_ratio"] = 1
-options["valid_ratio"] = 0.1
+options["valid_ratio"] = 0.3
 options["test_ratio"] = 1
 
 # features
@@ -49,7 +49,7 @@ options["layers"] = 4
 options["attn_heads"] = 4
 
 options["epochs"] = 200
-options["n_epochs_stop"] = 10
+options["n_epochs_stop"] = 100
 options["batch_size"] = 32
 
 options["corpus_lines"] = None
