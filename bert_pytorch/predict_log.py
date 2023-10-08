@@ -260,26 +260,22 @@ class Predictor():
         print("Saving test normal results")
         with open(self.model_dir + "test_normal_results", "wb") as f:
             pickle.dump(test_normal_results, f)
-        with open(self.model_dir + "test_normal_results.txt", "w") as f:
-            f.write(test_normal_results)
+
 
         print("Saving test abnormal results")
         with open(self.model_dir + "test_abnormal_results", "wb") as f:
             pickle.dump(test_abnormal_results, f)
-        with open(self.model_dir + "test_abnormal_results.txt", "w") as f:
-            f.write(test_abnormal_results)
+
 
         print("Saving test normal errors")
         with open(self.model_dir + "test_normal_errors.pkl", "wb") as f:
             pickle.dump(test_normal_errors, f)
-        with open(self.model_dir + "test_normal_errors.txt", "w") as f:
-            f.write(test_normal_errors)
+
 
         print("Saving test abnormal results")
         with open(self.model_dir + "test_abnormal_errors.pkl", "wb") as f:
             pickle.dump(test_abnormal_errors, f)
-        with open(self.model_dir + "test_abnormal_errors.txt", "w") as f:
-            f.write(test_abnormal_errors)
+
 
         params = {"is_logkey": self.is_logkey, "is_time": self.is_time, "hypersphere_loss": self.hypersphere_loss,
                   "hypersphere_loss_test": self.hypersphere_loss_test}
